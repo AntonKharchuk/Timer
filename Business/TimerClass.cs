@@ -10,9 +10,9 @@ namespace Timer.Business
         public DateTime EndTime { get; private set; }
         public TimeSpan Tick { get; set; }
 
-        public event EventHandler<EventArgs> TimerStarted;
-        public event EventHandler<EventArgs> TimerEnded;
-        public event EventHandler<EventArgs> TimerTicked;
+        public event EventHandler<EventArgs>? TimerStarted;
+        public event EventHandler<EventArgs>? TimerEnded;
+        public event EventHandler<EventArgs>? TimerTicked;
 
         public TimerClass()
         {
