@@ -23,7 +23,7 @@ namespace Timer.Business
         {
             IsRunning = true;
             StartTicks();
-            TimerStarted.Invoke(this, new EventArgs());
+            TimerStarted?.Invoke(this, new EventArgs());
         }
         private async void StartTicks()
         {
@@ -31,13 +31,14 @@ namespace Timer.Business
                 if (EndTime<DateTime.Now)
                 {
                     IsRunning = false;
-                    TimerEnded.Invoke(this, new EventArgs());
+
+                    TimerEnded?.Invoke(this, new EventArgs());
                     return;
                 }
                 else
                 {
                     await Task.Delay(Tick);
-                    TimerTicked.Invoke(this, new EventArgs());
+                    TimerTicked?.Invoke(this, new EventArgs());
                 }
             }
 

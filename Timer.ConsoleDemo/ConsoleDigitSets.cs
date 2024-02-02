@@ -3,7 +3,7 @@ namespace Timer.ConsoleDemo
 {
     public class ConsoleDigitSets
     {
-        public ConsoleDigit[] Digits5x5 = new ConsoleDigit[]
+        public static ConsoleDigit[] Digits5x5 = new ConsoleDigit[]
        {
             new ConsoleDigit()
             {
