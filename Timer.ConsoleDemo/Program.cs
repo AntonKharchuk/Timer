@@ -34,14 +34,13 @@ movingTimer.TimerEnded += async (o, e) =>
     }
 };
 
-DisplayTimerView timerView = new DisplayTimerView(new TimerClass());
 DisplayTimerWithMoves displayTimerWithMoves = new DisplayTimerWithMoves();
 DisplayTimerWithMovesView displayTimerWithMovesView = new DisplayTimerWithMovesView(displayTimerWithMoves,0,0,50,210);
 displayTimerWithMovesView.StartDisplayingTimer(movingTimer);
 
 movingTimer.TimerEnded += TimerEndedEnotherTurnAskHandler;
 
-movingTimer.SetEndTime(timerView.GetEndTimeFromUser());
+movingTimer.SetEndTime(displayTimerWithMoves.GetEndTimeFromUser(0,0));
 displayTimerWithMovesView.DisplayBorders();
 movingTimer.Start();
 
@@ -51,7 +50,7 @@ while (true)
 }
 void TimerEndedEnotherTurnAskHandler(object sender, EventArgs e)
 {
-    movingTimer.SetEndTime(timerView.GetEndTimeFromUser());
+    movingTimer.SetEndTime(displayTimerWithMoves.GetEndTimeFromUser(0, 0));
     displayTimerWithMovesView.DisplayBorders();
     movingTimer.Start();
 }

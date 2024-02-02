@@ -59,6 +59,85 @@ namespace Timer.ConsoleDemo
             top++;
         }
 
+        public DateTime GetEndTimeFromUser(int startX, int startY)
+        {
+            Console.CursorVisible = false;
+            var hour = DateTime.Now.Hour;
+            var minute = DateTime.Now.Minute;
+
+            UpdateTime();
+
+            bool isHourChosing = true;
+            bool isTimeSelected = false;
+            while (!isTimeSelected)
+            {
+                switch (GetSelectionFromUser())
+                {
+                    case ConsoleKey.LeftArrow:
+                        isHourChosing = true;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        if (isHourChosing)
+                        {
+                            if (hour + 1 < 24)
+                                hour++;
+                            else
+                                hour = 0;
+                            UpdateTime();
+                        }
+                        else
+                        {
+                            if (minute + 1 < 60)
+                                minute++;
+                            else
+                                minute = 0;
+                            UpdateTime();
+                        }
+                        break;
+                    case ConsoleKey.RightArrow:
+                        isHourChosing = false;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        if (isHourChosing)
+                        {
+                            if (hour - 1 >= 0)
+                                hour--;
+                            else
+                                hour = 23;
+                            UpdateTime();
+                        }
+                        else
+                        {
+                            if (minute - 1 >= 0)
+                                minute--;
+                            else
+                                minute = 59;
+                            UpdateTime();
+                        }
+                        break;
+                    case ConsoleKey.Enter:
+                        isTimeSelected = true;
+                        break;
+                }
+            }
+
+
+            if (DateTime.Now.Hour > hour || DateTime.Now.Hour == hour && DateTime.Now.Minute >= minute)//timer for today or tomorrow
+            {
+                return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1, hour, minute, 0);
+            }
+            else
+            {
+                return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour, minute, 0);
+            }
+
+            void UpdateTime()
+            {
+                ClearBordersFor5x5DigitTimeInConsole(startX, startY);
+                ShowTimerInConsole( startX, startY, hour, minute);
+            }
+        }
+
         private ConsoleKey GetSelectionFromUser()
         {
             while (true)
