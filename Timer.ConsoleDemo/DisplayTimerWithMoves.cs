@@ -1,22 +1,33 @@
 ﻿
+using System.Linq;
+
 namespace Timer.ConsoleDemo
 {
     public class DisplayTimerWithMoves
     {
+        public readonly object ConsoleLock;
+
+        public DisplayTimerWithMoves(object consoleLock)
+        {
+            ConsoleLock = consoleLock;
+        }
+
         public void ShowTimerInConsole(int left, int top, int hour, int minute)
         {
             var startX = left;
             var startY = top;
             var digitsGab = 6;
+            lock (ConsoleLock)
+            {
+                ShowBordersFor5x5DigitTimeInConsole(ref startX, ref startY);
 
-            ShowBordersFor5x5DigitTimeInConsole(ref startX, ref startY);
+                ConsoleDigitSets.Digits5x5[hour / 10].WriteDigitToConsole(startX, startY);
+                ConsoleDigitSets.Digits5x5[hour % 10].WriteDigitToConsole(startX + digitsGab, startY);
+                ConsoleDigitSets.Digits5x5[minute / 10].WriteDigitToConsole(startX + digitsGab * 2 + 2, startY);
+                ConsoleDigitSets.Digits5x5[minute % 10].WriteDigitToConsole(startX + digitsGab * 3 + 2, startY);
 
-            ConsoleDigitSets.Digits5x5[hour / 10].WriteDigitToConsole(startX, startY);
-            ConsoleDigitSets.Digits5x5[hour % 10].WriteDigitToConsole(startX + digitsGab, startY);
-            ConsoleDigitSets.Digits5x5[minute / 10].WriteDigitToConsole(startX + digitsGab * 2 + 2, startY);
-            ConsoleDigitSets.Digits5x5[minute % 10].WriteDigitToConsole(startX + digitsGab * 3 + 2, startY);
-
-            Console.CursorVisible = false;
+                Console.CursorVisible = false;
+            }
         }
         public void ClearBordersFor5x5DigitTimeInConsole(int left, int top)
         {
@@ -24,11 +35,14 @@ namespace Timer.ConsoleDemo
             var leftRightBorderLength = 7;
             var rowOfSpaces = new string(' ', upperLowerBorderLength);
 
-            for (int i = 0; i < leftRightBorderLength; i++)
+            lock (ConsoleLock)
             {
-                Console.CursorLeft = left;
-                Console.CursorTop = top + i;
-                Console.Write(rowOfSpaces);
+                for (int i = 0; i < leftRightBorderLength; i++)
+                {
+                    Console.CursorLeft = left;
+                    Console.CursorTop = top + i;
+                    Console.Write(rowOfSpaces);
+                }
             }
         }
 
@@ -67,12 +81,19 @@ namespace Timer.ConsoleDemo
 
             UpdateTime();
 
-            bool isHourChosing = true;
+            bool isHourChosing = false;
             bool isTimeSelected = false;
+
+            var validKeys = new List<ConsoleKey> { 
+                ConsoleKey.Enter, ConsoleKey.DownArrow, ConsoleKey.UpArrow, ConsoleKey.RightArrow, ConsoleKey.LeftArrow, ConsoleKey.Spacebar
+            };
             while (!isTimeSelected)
             {
-                switch (GetSelectionFromUser())
+                switch (GetSelectionFromUser(validKeys))
                 {
+                    case ConsoleKey.Spacebar:
+                        ClearBordersFor5x5DigitTimeInConsole(startX, startY);
+                        return DateTime.Now.AddDays(-1);
                     case ConsoleKey.LeftArrow:
                         isHourChosing = true;
                         break;
@@ -116,6 +137,7 @@ namespace Timer.ConsoleDemo
                         }
                         break;
                     case ConsoleKey.Enter:
+                        ClearBordersFor5x5DigitTimeInConsole(startX, startY);
                         isTimeSelected = true;
                         break;
                 }
@@ -138,20 +160,14 @@ namespace Timer.ConsoleDemo
             }
         }
 
-        private ConsoleKey GetSelectionFromUser()
+        public ConsoleKey GetSelectionFromUser(List<ConsoleKey> validKeys)
         {
             while (true)
             {
                 var consoleKeyInfo = Console.ReadKey();
-                switch (consoleKeyInfo.Key)
-                {
-                    case ConsoleKey.LeftArrow:
-                    case ConsoleKey.UpArrow:
-                    case ConsoleKey.RightArrow:
-                    case ConsoleKey.DownArrow:
-                    case ConsoleKey.Enter:
-                        return consoleKeyInfo.Key;
-                }
+
+                if (validKeys.Contains(consoleKeyInfo.Key))
+                    return consoleKeyInfo.Key;
             }
         }
 

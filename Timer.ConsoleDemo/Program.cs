@@ -8,9 +8,56 @@ using Timer.Business;
 using Timer.ConsoleDemo;
 
 Console.CursorVisible = false;
+
+DisplayTimerWithMoves displayTimerWithMoves = new DisplayTimerWithMoves(new object());
+DisplayTimerWithMovesView displayTimerWithMovesView = new DisplayTimerWithMovesView(displayTimerWithMoves, 0, 0, 50, 210);
+
+var TimersTickValue = 0.05;
+
 MovingTimer movingTimer = new MovingTimer();
-movingTimer.Tick = TimeSpan.FromSeconds(0.05);
-movingTimer.TimerEnded += async (o, e) =>
+movingTimer.Tick = TimeSpan.FromSeconds(TimersTickValue);
+movingTimer.TimerEnded += PlayMysicAtTheEndOfTheTimer;
+var firstEndTime = displayTimerWithMoves.GetEndTimeFromUser(1, 1);
+
+displayTimerWithMovesView.DisplayBorders();
+displayTimerWithMovesView.DisplayTime();
+
+if (firstEndTime > DateTime.Now) 
+{
+    movingTimer.SetEndTime(firstEndTime);
+    displayTimerWithMovesView.StartDisplayingTimer(movingTimer);
+    movingTimer.Start();
+}
+
+
+var validKeys = new List<ConsoleKey> { ConsoleKey.Spacebar, ConsoleKey.Escape };
+
+bool isProgramEnded=false;
+while (!isProgramEnded)
+{
+    switch (displayTimerWithMoves.GetSelectionFromUser(validKeys))
+    {
+        case ConsoleKey.Spacebar:
+            var endTime = displayTimerWithMoves.GetEndTimeFromUser(1, 1);
+            if (endTime < DateTime.Now)
+            {
+                break;
+            }
+            MovingTimer newTimer = new MovingTimer();
+            newTimer.Tick = TimeSpan.FromSeconds(TimersTickValue);
+            newTimer.TimerEnded += PlayMysicAtTheEndOfTheTimer;
+            newTimer.SetEndTime(endTime);
+            displayTimerWithMovesView.StartDisplayingTimer(newTimer);
+            newTimer.Start();
+
+            break;
+        case ConsoleKey.Escape:
+            isProgramEnded = true;
+            break;
+    }
+}
+
+async void PlayMysicAtTheEndOfTheTimer(object sender, EventArgs e)
 {
     try
     {
@@ -33,24 +80,3 @@ movingTimer.TimerEnded += async (o, e) =>
         Console.WriteLine($"Error: {ex.Message}");
     }
 };
-
-DisplayTimerWithMoves displayTimerWithMoves = new DisplayTimerWithMoves();
-DisplayTimerWithMovesView displayTimerWithMovesView = new DisplayTimerWithMovesView(displayTimerWithMoves,0,0,50,210);
-displayTimerWithMovesView.StartDisplayingTimer(movingTimer);
-
-movingTimer.TimerEnded += TimerEndedEnotherTurnAskHandler;
-
-movingTimer.SetEndTime(displayTimerWithMoves.GetEndTimeFromUser(0,0));
-displayTimerWithMovesView.DisplayBorders();
-movingTimer.Start();
-
-while (true)
-{
-
-}
-void TimerEndedEnotherTurnAskHandler(object sender, EventArgs e)
-{
-    movingTimer.SetEndTime(displayTimerWithMoves.GetEndTimeFromUser(0, 0));
-    displayTimerWithMovesView.DisplayBorders();
-    movingTimer.Start();
-}

@@ -6,11 +6,13 @@ namespace Timer.ConsoleDemo
     public class DisplayTimerWithMovesView
     {
         private DisplayTimerWithMoves _displayTimer;
+        private Obsticle _timerObsticle;
 
         public int FieldLeft { get; set; }
         public int FieldTop { get; set; }
         public int FieldHeight { get; set; }
         public int FieldLength { get; set; }
+
 
         public DisplayTimerWithMovesView(DisplayTimerWithMoves displayTimer, int top, int left, int height, int length)
         {
@@ -28,23 +30,25 @@ namespace Timer.ConsoleDemo
             var upperLowerBorder = new string(upperLowerBorderChar, FieldLength);
             var freeSpaceWithLeftRightBorders = leftRightBorderChar + new string(' ', FieldLength - 2) + leftRightBorderChar;
 
-            Console.CursorLeft = FieldLeft;
-            Console.CursorTop = FieldTop;
-            Console.Write(upperLowerBorder);
-
-            for (int i = 0; i < FieldHeight - 2; i++)
+            lock (_displayTimer.ConsoleLock)
             {
                 Console.CursorLeft = FieldLeft;
-                Console.CursorTop = FieldTop + 1 + i;
-                Console.Write(freeSpaceWithLeftRightBorders);
+                Console.CursorTop = FieldTop;
+                Console.Write(upperLowerBorder);
+
+                for (int i = 0; i < FieldHeight - 2; i++)
+                {
+                    Console.CursorLeft = FieldLeft;
+                    Console.CursorTop = FieldTop + 1 + i;
+                    Console.Write(freeSpaceWithLeftRightBorders);
+                }
+                Console.CursorLeft = FieldLeft;
+                Console.CursorTop = FieldTop + FieldHeight - 1;
+                Console.Write(upperLowerBorder);
             }
-            Console.CursorLeft = FieldLeft;
-            Console.CursorTop = FieldTop + FieldHeight - 1;
-            Console.Write(upperLowerBorder);
         }
 
-        private int TimeTop = 20;
-        private int TimeLeft = 89;
+
 
         public void StartDisplayingTimer(MovingTimer movingTimer)
         {
@@ -57,9 +61,31 @@ namespace Timer.ConsoleDemo
             _displayTimer.ClearBordersFor5x5DigitTimeInConsole(timer.Left, timer.Top);
             MoveTimer(timer);
             var timeLeft = timer.EndTime - DateTime.Now;
-            _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Minutes, timeLeft.Seconds);
-            _displayTimer.ShowTimerInConsole(TimeLeft, TimeTop, DateTime.Now.Hour, DateTime.Now.Minute);
+            if (timeLeft.Hours>0)
+                _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Hours, timeLeft.Minutes);
+            else
+                _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Minutes, timeLeft.Seconds);
+        }
 
+
+        public async void DisplayTime()
+        {
+            if (_timerObsticle is not null)
+            {
+                return;
+            }
+            int timeHeight = 5;
+            int timeLenght = 28;
+            int timeTop = (FieldTop + FieldHeight - timeHeight) / 2;
+            int timeLeft = (FieldLeft + FieldLength - timeLenght) / 2;
+
+            _timerObsticle = new Obsticle(timeLeft + 1, timeTop + 1, timeLenght, timeHeight);
+
+            while (true)
+            {
+                _displayTimer.ShowTimerInConsole(timeLeft, timeTop, DateTime.Now.Hour, DateTime.Now.Minute);
+                await Task.Delay(1000);
+            }
         }
 
         private void MoveTimer(MovingTimer movingTimer)
@@ -68,6 +94,19 @@ namespace Timer.ConsoleDemo
             var top = movingTimer.Top;
             var right = movingTimer.Left + movingTimer.Width;
             var down = movingTimer.Top + movingTimer.Height;
+
+            bool isLeftSpeedRandomlyMyltiplied = false;
+            bool isTopSpeedRandomlyMyltiplied = false;
+            Random random = new Random();
+            if (random.Next(100) == 5)
+                isLeftSpeedRandomlyMyltiplied = true;
+            if (random.Next(100) == 5)
+                isTopSpeedRandomlyMyltiplied = true;
+
+            if (isLeftSpeedRandomlyMyltiplied)
+                movingTimer.LeftSpeed *= 2;
+            if (isTopSpeedRandomlyMyltiplied)
+                movingTimer.TopSpeed *= 2;
 
             //move timer
             left += movingTimer.LeftSpeed;
@@ -93,11 +132,20 @@ namespace Timer.ConsoleDemo
                 movingTimer.LeftSpeed = -movingTimer.LeftSpeed;
             }
 
-            BounceFromObsticle(movingTimer, new Obsticle(TimeLeft+1, TimeTop+1, 28, 5));
+            if (_timerObsticle is not null)
+            {
+                BounceFromObsticle(movingTimer, _timerObsticle);
+            }
 
             movingTimer.Top += movingTimer.TopSpeed;
             movingTimer.Left += movingTimer.LeftSpeed;
+
+            if (isLeftSpeedRandomlyMyltiplied)
+                movingTimer.LeftSpeed /= 2;
+            if (isTopSpeedRandomlyMyltiplied)
+                movingTimer.TopSpeed /= 2;
         }
+        
 
         private void BounceFromObsticle(MovingTimer movingTimer, Obsticle obsticle)
         {
@@ -120,7 +168,7 @@ namespace Timer.ConsoleDemo
             {
                 movingTimer.LeftSpeed = -movingTimer.LeftSpeed;
             }
-            else if (left < obsticle.Left + obsticle.Width && right >obsticle.Left && down >= obsticle.Top && down <= obsticle.Top + obsticle.Height)
+            else if (left < obsticle.Left + obsticle.Width && right > obsticle.Left && down >= obsticle.Top && down <= obsticle.Top + obsticle.Height)
             {
                 movingTimer.TopSpeed = -movingTimer.TopSpeed;
             }
