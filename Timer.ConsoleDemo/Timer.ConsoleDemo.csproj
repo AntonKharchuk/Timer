@@ -15,4 +15,10 @@
     <ProjectReference Include="..\Business\Timer.Business.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Mother_Mother-Verbatim.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

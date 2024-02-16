@@ -1,9 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using NAudio.Wave;
 
-using System.Net.Http.Headers;
-using System.Reflection;
-
 using Timer.Business;
 using Timer.ConsoleDemo;
 
@@ -67,8 +64,12 @@ async void PlayMysicAtTheEndOfTheTimer(object sender, EventArgs e)
 {
     try
     {
-        var pathToMediaFile = @"C:\Users\Anton\Desktop\Дымок (feat. Игорь цыба) - Ицык Цыпер.m4a";
-        using (var reader = new MediaFoundationReader(pathToMediaFile))
+        var mediaFileName = @"Mother_Mother-Verbatim.mp3";
+
+        // Get the full path of the file
+        var fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, mediaFileName);
+
+        using (var reader = new MediaFoundationReader(fullPath))
         {
             using (var waveOut = new WaveOutEvent())
             {
@@ -76,7 +77,7 @@ async void PlayMysicAtTheEndOfTheTimer(object sender, EventArgs e)
                 waveOut.DesiredLatency = latency;
                 waveOut.Init(reader);
                 waveOut.Play();
-                await Task.Delay(latency);
+                Console.ReadKey();
                 waveOut.Stop();
             }
         }
