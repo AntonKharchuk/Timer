@@ -1,7 +1,7 @@
 ﻿
 using System.Reflection.Metadata.Ecma335;
 
-namespace Timer.Business
+namespace Timer.Domain.Entities.Timers
 {
     public class TimerClass : ITimer
     {

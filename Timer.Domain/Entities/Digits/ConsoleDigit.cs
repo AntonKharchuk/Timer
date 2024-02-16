@@ -1,5 +1,7 @@
 ﻿
-namespace Timer.ConsoleDemo
+using Timer.Domain.Exeptions;
+
+namespace Timer.Domain.Entities.Digits
 {
     public class ConsoleDigit
     {

@@ -1,5 +1,5 @@
 ﻿
-namespace Timer.ConsoleDemo
+namespace Timer.Domain.Entities.Digits
 {
     public class ConsoleDigitSets
     {

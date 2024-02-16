@@ -1,6 +1,8 @@
 ﻿
 using System.Linq;
 
+using Timer.Domain.Entities.Digits;
+
 namespace Timer.ConsoleDemo
 {
     public class DisplayTimerWithMoves

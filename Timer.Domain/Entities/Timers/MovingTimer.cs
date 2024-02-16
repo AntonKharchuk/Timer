@@ -1,5 +1,5 @@
 ﻿
-namespace Timer.Business
+namespace Timer.Domain.Entities.Timers
 {
     public class MovingTimer:TimerClass
     {

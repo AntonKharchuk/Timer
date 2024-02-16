@@ -1,5 +1,5 @@
 ﻿
-namespace Timer.ConsoleDemo
+namespace Timer.Domain.Exeptions
 {
     internal class IncorrectConsoleSizeExeption : Exception
     {

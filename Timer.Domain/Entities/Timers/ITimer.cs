@@ -1,4 +1,4 @@
-﻿namespace Timer.Business
+﻿namespace Timer.Domain.Entities.Timers
 {
     public interface ITimer
     {

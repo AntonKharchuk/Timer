@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Timer.Domain\Timer.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
