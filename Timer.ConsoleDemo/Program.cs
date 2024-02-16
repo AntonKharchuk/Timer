@@ -9,8 +9,15 @@ using Timer.ConsoleDemo;
 
 Console.CursorVisible = false;
 
+ConsoleWindowSizeMonitor consoleWindowSizeMonitor = new ConsoleWindowSizeMonitor();
+consoleWindowSizeMonitor.StartMonitoring();
+
+
 DisplayTimerWithMoves displayTimerWithMoves = new DisplayTimerWithMoves(new object());
-DisplayTimerWithMovesView displayTimerWithMovesView = new DisplayTimerWithMovesView(displayTimerWithMoves, 0, 0, 50, 210);
+DisplayTimerWithMovesView displayTimerWithMovesView = new DisplayTimerWithMovesView(consoleWindowSizeMonitor,displayTimerWithMoves, 0, 0, Console.WindowHeight, Console.WindowWidth);
+
+displayTimerWithMovesView.StartFolowingConsoleWindowSize();
+displayTimerWithMovesView.DisplayBorders();
 
 var TimersTickValue = 0.05;
 
@@ -19,8 +26,7 @@ movingTimer.Tick = TimeSpan.FromSeconds(TimersTickValue);
 movingTimer.TimerEnded += PlayMysicAtTheEndOfTheTimer;
 var firstEndTime = displayTimerWithMoves.GetEndTimeFromUser(1, 1);
 
-displayTimerWithMovesView.DisplayBorders();
-displayTimerWithMovesView.DisplayTime();
+displayTimerWithMovesView.StartDisplaingTime();
 
 if (firstEndTime > DateTime.Now) 
 {

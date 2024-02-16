@@ -5,8 +5,11 @@ namespace Timer.ConsoleDemo
 {
     public class DisplayTimerWithMovesView
     {
+        private ConsoleWindowSizeMonitor _windowSizeMonitor;
         private DisplayTimerWithMoves _displayTimer;
-        private Obsticle _timerObsticle;
+        private Obstacle _timerObsticle;
+
+        public bool IsTimerShown { get; set; }
 
         public int FieldLeft { get; set; }
         public int FieldTop { get; set; }
@@ -14,14 +17,32 @@ namespace Timer.ConsoleDemo
         public int FieldLength { get; set; }
 
 
-        public DisplayTimerWithMovesView(DisplayTimerWithMoves displayTimer, int top, int left, int height, int length)
+        public DisplayTimerWithMovesView(ConsoleWindowSizeMonitor windowSizeMonitor, DisplayTimerWithMoves displayTimer, int top, int left, int height, int length)
         {
+            IsTimerShown = false;
+            _windowSizeMonitor = windowSizeMonitor;
             _displayTimer = displayTimer;
             FieldLeft = top;
             FieldTop = left;
             FieldHeight = height;
             FieldLength = length;
         }
+
+        public void StartFolowingConsoleWindowSize()
+        {
+            _windowSizeMonitor.SizeChanged += ConsoleSizeChangeHandler;
+        }
+
+
+        private void ConsoleSizeChangeHandler(object sender, EventArgs e)
+        {
+            var sizeMonitor = (ConsoleWindowSizeMonitor)sender;
+            FieldHeight = sizeMonitor.ConsoleWindowHeight;
+            FieldLength = sizeMonitor.ConsoleWindowWidth;
+            Console.Clear();
+            DisplayBorders();
+        }
+
         public void DisplayBorders()
         {
 
@@ -48,8 +69,6 @@ namespace Timer.ConsoleDemo
             }
         }
 
-
-
         public void StartDisplayingTimer(MovingTimer movingTimer)
         {
             movingTimer.TimerTicked += TimerTickedHandler;
@@ -61,14 +80,27 @@ namespace Timer.ConsoleDemo
             _displayTimer.ClearBordersFor5x5DigitTimeInConsole(timer.Left, timer.Top);
             MoveTimer(timer);
             var timeLeft = timer.EndTime - DateTime.Now;
-            if (timeLeft.Hours>0)
-                _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Hours, timeLeft.Minutes);
-            else
-                _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Minutes, timeLeft.Seconds);
+
+            try
+            {
+                if (timeLeft.Hours > 0)
+                    _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Hours, timeLeft.Minutes);
+                else
+                    _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Minutes, timeLeft.Seconds);
+            }
+            
+            catch 
+            {
+                timer.Top = 2;
+                timer.Left = 2;
+                if (timeLeft.Hours > 0)
+                    _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Hours, timeLeft.Minutes);
+                else
+                    _displayTimer.ShowTimerInConsole(timer.Left, timer.Top, timeLeft.Minutes, timeLeft.Seconds);
+            }
         }
 
-
-        public async void DisplayTime()
+        public async void StartDisplaingTime()
         {
             if (_timerObsticle is not null)
             {
@@ -79,12 +111,19 @@ namespace Timer.ConsoleDemo
             int timeTop = (FieldTop + FieldHeight - timeHeight) / 2;
             int timeLeft = (FieldLeft + FieldLength - timeLenght) / 2;
 
-            _timerObsticle = new Obsticle(timeLeft + 1, timeTop + 1, timeLenght, timeHeight);
+            _timerObsticle = new Obstacle(timeLeft + 1, timeTop + 1, timeLenght, timeHeight);
 
-            while (true)
+            IsTimerShown = true; 
+            while (IsTimerShown)
             {
+                timeTop = (FieldTop + FieldHeight - timeHeight) / 2;
+                timeLeft = (FieldLeft + FieldLength - timeLenght) / 2;
+
+                _timerObsticle.Left = timeLeft + 1;
+                _timerObsticle.Top = timeTop + 1;
+
                 _displayTimer.ShowTimerInConsole(timeLeft, timeTop, DateTime.Now.Hour, DateTime.Now.Minute);
-                await Task.Delay(1000);
+                await Task.Delay(50);
             }
         }
 
@@ -94,6 +133,13 @@ namespace Timer.ConsoleDemo
             var top = movingTimer.Top;
             var right = movingTimer.Left + movingTimer.Width;
             var down = movingTimer.Top + movingTimer.Height;
+
+
+            if (right >= _windowSizeMonitor.ConsoleWindowWidth || down >= _windowSizeMonitor.ConsoleWindowHeight)
+            {
+                movingTimer.Top = 2;
+                movingTimer.Left = 2;
+            }
 
             bool isLeftSpeedRandomlyMyltiplied = false;
             bool isTopSpeedRandomlyMyltiplied = false;
@@ -132,7 +178,7 @@ namespace Timer.ConsoleDemo
                 movingTimer.LeftSpeed = -movingTimer.LeftSpeed;
             }
 
-            if (_timerObsticle is not null)
+            if (IsTimerShown == true)
             {
                 BounceFromObsticle(movingTimer, _timerObsticle);
             }
@@ -145,9 +191,9 @@ namespace Timer.ConsoleDemo
             if (isTopSpeedRandomlyMyltiplied)
                 movingTimer.TopSpeed /= 2;
         }
-        
 
-        private void BounceFromObsticle(MovingTimer movingTimer, Obsticle obsticle)
+
+        private void BounceFromObsticle(MovingTimer movingTimer, Obstacle obsticle)
         {
             var left = movingTimer.Left;
             var top = movingTimer.Top;
@@ -177,8 +223,21 @@ namespace Timer.ConsoleDemo
                 movingTimer.TopSpeed = -movingTimer.TopSpeed;
             }
         }
+        public class Obstacle
+        {
+            public int Left { get; set; }
+            public int Top { get; set; }
+            public int Width { get; }
+            public int Height { get; }
 
-        private record Obsticle(int Left, int Top, int Width, int Height);
+            public Obstacle(int left, int top, int width, int height)
+            {
+                Left = left;
+                Top = top;
+                Width = width;
+                Height = height;
+            }
+        }
 
         public void StopDisplayingTimer(MovingTimer movingTimer)
         {

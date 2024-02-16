@@ -21,12 +21,18 @@ namespace Timer.ConsoleDemo
             {
                 ShowBordersFor5x5DigitTimeInConsole(ref startX, ref startY);
 
-                ConsoleDigitSets.Digits5x5[hour / 10].WriteDigitToConsole(startX, startY);
-                ConsoleDigitSets.Digits5x5[hour % 10].WriteDigitToConsole(startX + digitsGab, startY);
-                ConsoleDigitSets.Digits5x5[minute / 10].WriteDigitToConsole(startX + digitsGab * 2 + 2, startY);
-                ConsoleDigitSets.Digits5x5[minute % 10].WriteDigitToConsole(startX + digitsGab * 3 + 2, startY);
-
-                Console.CursorVisible = false;
+                try
+                {
+                    ConsoleDigitSets.Digits5x5[hour / 10].WriteDigitToConsole(startX, startY);
+                    ConsoleDigitSets.Digits5x5[hour % 10].WriteDigitToConsole(startX + digitsGab, startY);
+                    ConsoleDigitSets.Digits5x5[minute / 10].WriteDigitToConsole(startX + digitsGab * 2 + 2, startY);
+                    ConsoleDigitSets.Digits5x5[minute % 10].WriteDigitToConsole(startX + digitsGab * 3 + 2, startY);
+                    Console.CursorVisible = false;
+                }
+                catch
+                {
+                  
+                }
             }
         }
         public void ClearBordersFor5x5DigitTimeInConsole(int left, int top)
